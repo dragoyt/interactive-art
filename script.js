@@ -5,6 +5,7 @@ let startPoint = { x: 0, y: 0 };
 let endPoint = { x: 0, y: 0 };
 let initialPinchDistance = null;
 let lastPinchDistance = null;
+let lastPinchMidpoint = { x: 0, y: 0 };
 
 // Prevent default touch behavior
 svg.addEventListener('touchstart', function(evt) {
@@ -71,6 +72,7 @@ svg.addEventListener('touchstart', function(evt) {
         isPanning = false;
         initialPinchDistance = getPinchDistance(evt.touches);
         lastPinchDistance = initialPinchDistance;
+        lastPinchMidpoint = getMidpoint(evt.touches);
     }
 });
 
@@ -86,9 +88,8 @@ svg.addEventListener('touchmove', function(evt) {
     } else if (evt.touches.length === 2) {
         let currentPinchDistance = getPinchDistance(evt.touches);
         let scale = lastPinchDistance / currentPinchDistance;
-        viewBox.width *= scale;
-        viewBox.height *= scale;
-        svg.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
+        let midpoint = getMidpoint(evt.touches);
+        zoomAtPoint(scale, midpoint);
         lastPinchDistance = currentPinchDistance;
     }
 });
@@ -98,10 +99,31 @@ svg.addEventListener('touchend', function() {
     svg.style.cursor = 'grab';
     initialPinchDistance = null;
     lastPinchDistance = null;
+    lastPinchMidpoint = { x: 0, y: 0 };
 });
 
 function getPinchDistance(touches) {
     let dx = touches[0].clientX - touches[1].clientX;
     let dy = touches[0].clientY - touches[1].clientY;
     return Math.sqrt(dx * dx + dy * dy);
+}
+
+function getMidpoint(touches) {
+    return {
+        x: (touches[0].clientX + touches[1].clientX) / 2,
+        y: (touches[0].clientY + touches[1].clientY) / 2
+    };
+}
+
+function zoomAtPoint(scale, point) {
+    let svgPoint = svg.createSVGPoint();
+    svgPoint.x = point.x;
+    svgPoint.y = point.y;
+    let transformedPoint = svgPoint.matrixTransform(svg.getScreenCTM().inverse());
+
+    viewBox.x = transformedPoint.x - (transformedPoint.x - viewBox.x) * scale;
+    viewBox.y = transformedPoint.y - (transformedPoint.y - viewBox.y) * scale;
+    viewBox.width *= scale;
+    viewBox.height *= scale;
+    svg.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
 }
