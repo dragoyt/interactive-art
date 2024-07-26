@@ -6,7 +6,6 @@ let endPoint = { x: 0, y: 0 };
 let initialPinchDistance = null;
 let lastPinchDistance = null;
 let lastPinchMidpoint = { x: 0, y: 0 };
-let pinchMidpoint = { x: 0, y: 0 };
 
 // Prevent default touch behavior
 svg.addEventListener('touchstart', function(evt) {
@@ -91,17 +90,17 @@ svg.addEventListener('touchmove', function(evt) {
     } else if (evt.touches.length === 2) {
         let currentPinchDistance = getPinchDistance(evt.touches);
         let scale = lastPinchDistance / currentPinchDistance;
-        pinchMidpoint = getMidpoint(evt.touches);
-        zoomAtPoint(scale, pinchMidpoint);
+        let midpoint = getMidpoint(evt.touches);
+        zoomAtPoint(scale, midpoint);
         lastPinchDistance = currentPinchDistance;
 
         // Handle panning during pinch zoom
-        let dx = (lastPinchMidpoint.x - pinchMidpoint.x) * (viewBox.width / svg.clientWidth);
-        let dy = (lastPinchMidpoint.y - pinchMidpoint.y) * (viewBox.height / svg.clientHeight);
+        let dx = (lastPinchMidpoint.x - midpoint.x) * (viewBox.width / svg.clientWidth);
+        let dy = (lastPinchMidpoint.y - midpoint.y) * (viewBox.height / svg.clientHeight);
         viewBox.x += dx;
         viewBox.y += dy;
         svg.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
-        lastPinchMidpoint = pinchMidpoint;
+        lastPinchMidpoint = midpoint;
     }
 });
 
@@ -111,7 +110,6 @@ svg.addEventListener('touchend', function() {
     initialPinchDistance = null;
     lastPinchDistance = null;
     lastPinchMidpoint = { x: 0, y: 0 };
-    pinchMidpoint = { x: 0, y: 0 };
 });
 
 function getPinchDistance(touches) {
