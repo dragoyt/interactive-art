@@ -104,12 +104,17 @@ svg.addEventListener('touchmove', function(evt) {
     }
 });
 
-svg.addEventListener('touchend', function() {
-    isPanning = false;
-    svg.style.cursor = 'grab';
-    initialPinchDistance = null;
-    lastPinchDistance = null;
-    lastPinchMidpoint = { x: 0, y: 0 };
+svg.addEventListener('touchend', function(evt) {
+    if (evt.touches.length < 2) {
+        isPanning = true;
+        if (evt.touches.length === 1) {
+            startPoint = { x: evt.touches[0].clientX, y: evt.touches[0].clientY };
+            svg.style.cursor = 'grabbing';
+        } else {
+            isPanning = false;
+            svg.style.cursor = 'grab';
+        }
+    }
 });
 
 function getPinchDistance(touches) {
