@@ -6,6 +6,11 @@ let endPoint = { x: 0, y: 0 };
 let initialPinchDistance = null;
 let lastPinchDistance = null;
 
+// Prevent default touch behavior
+svg.addEventListener('touchstart', function(evt) {
+    evt.preventDefault();
+}, { passive: false });
+
 svg.addEventListener('mousedown', function(evt) {
     isPanning = true;
     startPoint = { x: evt.clientX, y: evt.clientY };
@@ -54,17 +59,7 @@ svg.addEventListener('wheel', function(evt) {
     let scale = evt.deltaY > 0 ? 1.05 : 0.95; // Adjusted zoom speed
     let point = mousePointTo(evt);
 
-    if (evt.ctrlKey || evt.metaKey) {
-        // Handle pinch to zoom
-        zoom(scale, point);
-    } else {
-        // Handle two-finger slide (trackpad)
-        let dx = evt.deltaX * (viewBox.width / svg.clientWidth);
-        let dy = evt.deltaY * (viewBox.height / svg.clientHeight);
-        viewBox.x += dx;
-        viewBox.y += dy;
-        svg.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
-    }
+    zoom(scale, point);
 });
 
 svg.addEventListener('touchstart', function(evt) {
